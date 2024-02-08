@@ -1,0 +1,85 @@
+POST e-comm/_update_by_query
+{
+  "script": {
+    "source": """
+      if (ctx._source.Country == 'United Kingdom') {
+        ctx._source.Geo_location = [ -0.11, 51.50];
+      } else if (ctx._source.Country == 'France') {
+        ctx._source.Geo_location = [ 2.34, 48.86 ];
+      } else if (ctx._source.Country == 'Australia') {
+        ctx._source.Geo_location = [ 144.96, -37.81];
+      } else if (ctx._source.Country == 'Netherlands') {
+        ctx._source.Geo_location = [ 4.55, 52.23];
+      } else if (ctx._source.Country == 'Germany') {
+        ctx._source.Geo_location = [ 10.45, 51.16];
+      } else if (ctx._source.Country == 'EIRE') {
+        ctx._source.Geo_location = [ -7.92, 53.42];
+      } else if (ctx._source.Country == 'Spain') {
+        ctx._source.Geo_location = [ -4.83, 39.32];
+      } else if (ctx._source.Country == 'Belgium') {
+        ctx._source.Geo_location = [ 4.66, 50.64];
+      } else if (ctx._source.Country == 'Switzerland'){
+        ctx._source.Geo_location = [ 8.23, 46.79];
+      } else if (ctx._source.Country == 'Portugal'){
+        ctx._source.Geo_location = [ -8.13, 39.66];
+      } else if (ctx._source.Country == 'Norway') {
+        ctx._source.Geo_location = [ 8.78, 61.15];
+      } else if (ctx._source.Country == 'Italy') {
+        ctx._source.Geo_location = [ 12.67, 42.63];
+      } else if (ctx._source.Country == 'Channel Islands'){
+        ctx._source.Geo_location = [ -2.12, 49.21];
+      } else if (ctx._source.Country == 'Finland') {
+        ctx._source.Geo_location = [ 25.92, 63.24];
+      } else if (ctx._source.Country == 'Cyprus') {
+        ctx._source.Geo_location = [ 33.14, 34.98];
+      } else if (ctx._source.Country == 'Sweden') {
+        ctx._source.Geo_location = [ 14.52, 59.67];
+      } else if (ctx._source.Country == 'Austria') {
+        ctx._source.Geo_location = [ 14.12, 47.59];
+      } else if (ctx._source.Country == 'Denmark') {
+        ctx._source.Geo_location = [ 12.56, 47.59];
+      } else if (ctx._source.Country == 'Japan') {
+        ctx._source.Geo_location = [ 139.23, 36.57];
+      } else if (ctx._source.Country == 'Poland') {
+        ctx._source.Geo_location = [ 19.13, 52.21];
+      } else if (ctx._source.Country == 'Israel') {
+        ctx._source.Geo_location = [ 34.85, 30.81];
+      } else if (ctx._source.Country == 'USA') {
+        ctx._source.Geo_location = [ -74.00, 40.71];
+      } else if (ctx._source.Country == 'Hong Kong') {
+        ctx._source.Geo_location = [ 114.16, 22.27];
+      } else if (ctx._source.Country == 'Singapore') {
+        ctx._source.Geo_location = [ 103.81, 1.35];
+      } else if (ctx._source.Country == 'Iceland') {
+        ctx._source.Geo_location = [ -18.10, 64.98];
+      } else if (ctx._source.Country == 'Canada') {
+        ctx._source.Geo_location = [ -107.99, 61.06];
+      } else if (ctx._source.Country == 'Greece') {
+        ctx._source.Geo_location = [ 21.98, 38.99];
+      } else if (ctx._source.Country == 'Malta') {
+        ctx._source.Geo_location = [ 14.44, 35.88];
+      } else if (ctx._source.Country == 'United Arab Emirates') {
+        ctx._source.Geo_location = [ 53.99, 24.00];
+      } else if (ctx._source.Country == 'RSA') {
+        ctx._source.Geo_location = [ 24.99, -28.81];
+      } else if (ctx._source.Country == 'Lebanon') {
+        ctx._source.Geo_location = [ 35.84, 33.87];
+      } else if (ctx._source.Country == 'Lithuania') {
+        ctx._source.Geo_location = [ 23.74, 55.35];
+      } else if (ctx._source.Country == 'Brazil') {
+        ctx._source.Geo_location = [ -53.2, -10.33];
+      } else if (ctx._source.Country == 'Czech Republic') {
+        ctx._source.Geo_location = [ 15.33, 49.74];
+      } else if (ctx._source.Country == 'Bahrain') {
+        ctx._source.Geo_location = [ 50.53, 26.15];
+      } else if (ctx._source.Country == 'Saudi Arabia') {
+        ctx._source.Geo_location = [ 42.35, 25.62];
+      }
+    """
+  },
+  "query": {
+    "exists": {
+      "field": "Country"
+    }
+  }
+}
