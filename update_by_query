@@ -1,3 +1,5 @@
+## Skipping 'Unspecified' and 'European Community' since we have the name of each country.
+
 POST e-comm/_update_by_query
 {
   "script": {
