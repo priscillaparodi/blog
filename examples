@@ -1,0 +1,286 @@
+## blog examples
+
+## Store embeddings into Elasticsearch
+
+PUT e-comm-search
+{
+  "mappings": {
+    "properties": {
+      "Country": {
+        "type": "keyword"
+      },
+      "CustomerID": {
+        "type": "long"
+      },
+      "Description": {
+        "type": "text"
+      },
+      "InvoiceDate": {
+        "type": "date",
+        "format": "M/d/yyyy H:mm"
+      },
+      "InvoiceNo": {
+        "type": "keyword"
+      },
+      "Quantity": {
+        "type": "long"
+      },
+      "StockCode": {
+        "type": "keyword"
+      },
+      "UnitPrice": {
+        "type": "double"
+      },
+      "Description_vector.predicted_value": {
+        "type": "dense_vector",
+        "dims": 384, 
+        "index": "true",
+        "similarity": "cosine"
+      },
+      "Geo_location": {
+        "type": "geo_point"
+      }
+    },
+    "_source": {
+      "excludes": [
+        "Description_vector.predicted_value"
+      ]
+    }
+  }
+}
+
+## Generate embeddings
+
+PUT _ingest/pipeline/vectors
+{
+  "processors": [{
+    "inference": {
+      "model_id": "all-mini",
+      "target_field": "Description_vector",
+      "field_map": {
+      "Description": "text_field"
+      },
+      "ignore_failure": true
+    }
+  }]
+}
+
+## Task status
+
+GET _tasks/<task_id>
+
+## Perform Semantic Search
+
+POST e-comm-search/_search
+{
+ "knn": {
+    "field": "Description_vector.predicted_value",
+    "k": 2,
+    "num_candidates": 20,
+    "query_vector_builder": {
+      "text_embedding": { 
+        "model_id": "all-mini", 
+        "model_text": "celebration card"
+      }
+    }
+  }
+}
+
+## Refine search with filters
+
+POST e-comm-search/_search
+{
+  "knn": {
+    "field": "Description_vector.predicted_value",
+    "k": 2,
+    "num_candidates": 20,
+    "query_vector_builder": {
+      "text_embedding": {
+        "model_id": "all-mini",
+        "model_text": "celebration card"
+      }
+    },
+    "filter": {
+      "term": {
+        "CustomerID": "17736"
+      }
+    }
+  }
+}
+
+## Price range query 
+
+POST e-comm-search/_search
+{
+  "knn": {
+    "field": "Description_vector.predicted_value",
+    "k": 5,
+    "num_candidates": 50,
+    "query_vector_builder": {
+      "text_embedding": {
+        "model_id": "all-mini",
+        "model_text": "celebration card"
+      }
+  },
+  "filter": {
+    "range": {
+      "UnitPrice": {
+        "gte": 0.50,
+        "lte": 2.00
+      }
+    }
+  }
+  }
+}
+
+## Geo Query
+
+POST e-comm-search/_search
+{
+ "knn": {
+    "field": "Description_vector.predicted_value",
+    "k": 2,
+    "num_candidates": 20,
+    "query_vector_builder": {
+      "text_embedding": { 
+        "model_id": "all-mini", 
+        "model_text": "celebration card"
+      }
+    },
+    "filter": {
+      "geo_distance": {
+        "distance": "1000km",
+        "Geo_location": { 
+          "lat": 38.99,
+          "lon": 21.98
+        }
+      }
+    }
+  }
+}
+
+## Refine search with aggregations
+
+POST e-comm-search/_search
+{
+  "size": 0, 
+  "knn": {
+    "field": "Description_vector.predicted_value",
+    "k": 5,
+    "num_candidates": 50,
+    "query_vector_builder": {
+      "text_embedding": {
+        "model_id": "all-mini",
+        "model_text": "celebration card"
+      }
+    }
+  },
+  "aggs": {
+    "max_unit_price": {
+      "max": {
+        "field": "UnitPrice"
+      }
+    },
+    "min_unit_price": {
+      "min": {
+      "field": "UnitPrice"
+      }
+    },
+    "average_quantity": {
+      "avg": {
+        "field": "Quantity"
+      }
+    },
+    "total_quantity": {
+      "sum": {
+      "field": "Quantity"
+      }
+    }
+  }
+}
+
+POST e-comm-search/_search
+{
+  "size": 0, 
+  "knn": {
+    "field": "Description_vector.predicted_value",
+    "k": 5,
+    "num_candidates": 50,
+    "query_vector_builder": {
+      "text_embedding": {
+        "model_id": "all-mini",
+        "model_text": "celebration card"
+      }
+    }
+  },
+  "aggs": {
+    "total_paid (price*unit)": {
+      "sum": {
+        "script": {
+          "source": "doc['UnitPrice'].value * doc['Quantity'].value"
+        }
+      }
+    }
+  }
+}
+
+POST e-comm-search/_search
+{
+  "query": {
+...
+"filter": {...}
+  },
+  "knn": {
+...
+"filter": {...}
+  },
+  "rank": {
+  "rrf": {
+} 
+  },
+  "aggs": {
+...
+  }
+}
+
+POST e-comm-search/_search
+{
+  "query": {
+    "match": {
+      "Description": "card"
+    }
+  },
+  "knn": {
+    "field": "Description_vector.predicted_value",
+    "k": 5,
+    "num_candidates": 50,
+    "query_vector_builder": {
+      "text_embedding": { 
+        "model_id": "all-mini", 
+        "model_text": "celebration card"
+      }
+    },
+    "filter": {
+      "geo_distance": {
+        "distance": "1000km",
+        "Geo_location": { 
+          "lat": 38.99,
+          "lon": 21.98
+        }
+      }
+    }
+  },
+  "rank": {
+    "rrf": {
+      "window_size": 10,
+      "rank_constant": 1
+    }
+  },
+  "aggs": {
+    "max_unit_price": {
+      "max": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
